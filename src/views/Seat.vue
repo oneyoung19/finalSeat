@@ -49,10 +49,24 @@
 </template>
 
 <script>
+/* 为什么在这不能使用相对路径
+可选 http://img.vcdianying.com/nwx/images/kexuan_icon.png
+已选 http://img.vcdianying.com/nwx/images/yishou_icon.png
+情侣 http://img.vcdianying.com/nwx/images/qinglv_icon.png
+已售 http://img.vcdianying.com/nwx/images/green/yixuan_icon.png
+*/
 import datas from '@/assets/js/data4.js'
 export default {
   data () {
     return {
+      selectImg: 'http://img.vcdianying.com/nwx/images/kexuan_icon.png',
+      selectedImg: 'http://img.vcdianying.com/nwx/images/yishou_icon.png',
+      selledImg: 'http://img.vcdianying.com/nwx/images/green/yixuan_icon.png',
+      coupleImg: 'http://img.vcdianying.com/nwx/images/qinglv_icon.png',
+      // 图片
+      // selectImg: '../assets/images/kexuan@2x.png',
+      // selectedImg: '../assets/images/yixuan@2x.png',
+      // selledImg: '../assets/images/yishou@2x.png',
       // 规整数据(包含过道,权重)
       data: null,
       // 没有已售座位的数据
@@ -310,20 +324,20 @@ export default {
           }
           if (data[i][j].status === 'damage') {
             // 已售
-            this.loadImg('http://img.vcdianying.com/nwx/images/green/yixuan_icon.png', i, j)
+            this.loadImg(this.selledImg, i, j)
             continue
           }
           if (data[i][j].status === 'selected') {
-            this.loadImg('http://img.vcdianying.com/nwx/images/yishou_icon.png', i, j)
+            this.loadImg(this.selectedImg, i, j)
             continue
           }
           if (data[i][j].loveSeat) {
             // 情侣
-            this.loadImg('http://img.vcdianying.com/nwx/images/qinglv_icon.png', i, j)
+            this.loadImg(this.coupleImg, i, j)
             continue
           }
           // 可选
-          this.loadImg('http://img.vcdianying.com/nwx/images/kexuan_icon.png', i, j)
+          this.loadImg(this.selectImg, i, j)
         }
       }
       // 绘制线
@@ -386,17 +400,16 @@ export default {
       this.changeView = true
       // 如果点击的是已选的,在chooseCodes中删除code,将status改为available,再次重新渲染canvas---将当前y从chooseRows中删除
       if (this.data[y][x].status === 'selected') {
-        // this.loadImg('http://img.vcdianying.com/nwx/images/kexuan_icon.png',y,x)
         this.data[y][x].status = 'available'
         this.chooseCodes.splice(this.chooseCodes.findIndex(item => item === this.data[y][x].code), 1)
         this.chooseRows.splice(this.chooseRows.findIndex(item => item === y), 1)
         // this.data[y][x].loveSeat?(this.data[y][x].flag = '2'):(this.data[y][x].flag = '0')
         if (this.data[y][x].loveSeat) {
           this.data[y][x].flag = '2'
-          this.loadImg('http://img.vcdianying.com/nwx/images/qinglv_icon.png', y, x)
+          this.loadImg(this.coupleImg, y, x)
         } else {
           this.data[y][x].flag = '0'
-          this.loadImg('http://img.vcdianying.com/nwx/images/kexuan_icon.png', y, x)
+          this.loadImg(this.selectImg, y, x)
         }
         this.reduceSeatNum({ seatNum })
         if (this.chooseCodes.length === 0) {
@@ -408,7 +421,7 @@ export default {
         }
 
         // 如果点击的是可选的,改变status,添加code---将y添加进chooseRows中
-        this.loadImg('http://img.vcdianying.com/nwx/images/yishou_icon.png', y, x)
+        this.loadImg(this.selectedImg, y, x)
         this.data[y][x].status = 'selected'
         this.chooseCodes.push(this.data[y][x].code)
         this.chooseRows.push(y)
@@ -478,8 +491,8 @@ export default {
             FIXME:
             this.data[bestY][bestX].status = 'selected'
             this.data[bestY][bestX-1].status = 'selected'
-            this.loadImg('http://img.vcdianying.com/nwx/images/yishou_icon.png',bestY,bestX)
-            this.loadImg('http://img.vcdianying.com/nwx/images/yishou_icon.png',bestY,bestX-1)
+            this.loadImg(this.selectedImg, bestY, bestX)
+            this.loadImg(this.selectedImg, bestY, bestX-1)
             this.chooseCodes.push(this.data[bestY][bestX-1].code,this.data[bestY][bestX].code)
             创建一个二维数组,传递给seatnum.vue
             let seatNum = []
@@ -618,7 +631,7 @@ export default {
       let seatNum = []
       x.forEach((item) => {
         this.data[y][item].status = 'selected'
-        this.loadImg('http://img.vcdianying.com/nwx/images/yishou_icon.png', y, item)
+        this.loadImg(this.selectedImg, y, item)
         this.chooseCodes.push(this.data[y][item].code)
         this.data[y][item].loveSeat ? (this.data[y][item].flag = '3') : (this.data[y][item].flag = '1')
         let arr = []
@@ -696,7 +709,8 @@ export default {
         for (let j = 0; j < this.data[i].length; j++) {
           if (this.data[i][j].rowNum === arr[0] && this.data[i][j].columnNum === arr[1]) {
             // 这里要判断下是否是loveseat
-            this.data[i][j].loveSeat ? this.loadImg('http://img.vcdianying.com/nwx/images/qinglv_icon.png', i, j) : this.loadImg('http://img.vcdianying.com/nwx/images/kexuan_icon.png', i, j)
+            // this.loadImg('http://img.vcdianying.com/nwx/images/kexuan_icon.png',y,x)
+            this.data[i][j].loveSeat ? this.loadImg(this.coupleImg, i, j) : this.loadImg(this.selectImg, i, j)
             this.data[i][j].status = 'available'
             this.chooseCodes.splice(this.chooseCodes.findIndex(item => item === this.data[i][j].code), 1)
             this.chooseRows.splice(this.chooseRows.findIndex(item => item === i), 1)
@@ -715,12 +729,6 @@ export default {
     }
   }
 }
-/* 为什么在这不能使用相对路径
-可选 http://img.vcdianying.com/nwx/images/kexuan_icon.png
-已选 http://img.vcdianying.com/nwx/images/yishou_icon.png
-情侣 http://img.vcdianying.com/nwx/images/qinglv_icon.png
-已售 http://img.vcdianying.com/nwx/images/green/yixuan_icon.png
-*/
 </script>
 
 <style lang="less" scoped>
