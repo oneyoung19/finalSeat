@@ -312,8 +312,8 @@ export default {
       // this.canvasWidth = this.cols * 28 + 20
       // this.seatWidth = (this.canvasWidth-20)/this.cols
       // canvas 高度 ---座位高度固定值28
-      this.canvasWidth = this.cols * this.seatWidth + 20
-      this.canvasHeight = this.rows * this.seatHeight + 20
+      this.canvasWidth = this.cols * this.seatWidth
+      this.canvasHeight = this.rows * this.seatHeight
       // 这里不要使用style样式来设置width和height---原始的width和height用来设置绘图尺寸,css的width和height用来设置显示尺寸
       this.$refs['seats'].width = this.canvasWidth * 4
       this.$refs['seats'].style.width = this.canvasWidth + 'px'
@@ -362,11 +362,11 @@ export default {
       const w = this.seatWidth
       const h = this.seatHeight
       // 清除之前的图片
-      this.ctx.clearRect(10 + j * w, 15 + i * h, w, h)
+      this.ctx.clearRect(j * w, i * h, w, h)
       let img = new Image()
       img.src = src
       img.onload = () => {
-        this.ctx.drawImage(img, 10 + j * w, 15 + i * h, w, h)
+        this.ctx.drawImage(img, j * w, i * h, w, h)
       }
     },
     setLine () {
@@ -751,21 +751,22 @@ export default {
     .canvas {
       display: flex;
       justify-content: center;
-      align-items: center;
+      // align-items: center;
       width: 100%;
       height: 100%;
     }
     .row {
       position: absolute;
-      top: 50%;
+      top: -5px;
       left: 0;
-      transform: translateY(-50%);
+      // transform: translateY(-50%);
       .rowbar {
-        padding: 10px 0;
+        margin: 0;
+        padding: 5px 0;
         background-color: rgba(0,0,0,0.5);
         border-radius: 10px;
         li {
-          height: 28px;
+          height: 26px;
           line-height: 28px;
           text-align: center;
           color: #fff;
