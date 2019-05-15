@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="wrapper">
-      <div class="canvas">
+      <div class="canvas" ref="canvas">
         <canvas class="seats" @click="choose" ref="seats"></canvas>
       </div>
       <div class="row">
@@ -49,24 +49,16 @@
 </template>
 
 <script>
-/* 为什么在这不能使用相对路径
-可选 http://img.vcdianying.com/nwx/images/kexuan_icon.png
-已选 http://img.vcdianying.com/nwx/images/yishou_icon.png
-情侣 http://img.vcdianying.com/nwx/images/qinglv_icon.png
-已售 http://img.vcdianying.com/nwx/images/green/yixuan_icon.png
-*/
 import datas from '@/assets/js/data4.js'
+import Bscroll from 'better-scroll'
 export default {
   data () {
     return {
+      // 图片
       selectImg: 'http://img.vcdianying.com/nwx/images/kexuan_icon.png',
       selectedImg: 'http://img.vcdianying.com/nwx/images/yishou_icon.png',
       selledImg: 'http://img.vcdianying.com/nwx/images/green/yixuan_icon.png',
       coupleImg: 'http://img.vcdianying.com/nwx/images/qinglv_icon.png',
-      // 图片
-      // selectImg: '../assets/images/kexuan@2x.png',
-      // selectedImg: '../assets/images/yixuan@2x.png',
-      // selledImg: '../assets/images/yishou@2x.png',
       // 规整数据(包含过道,权重)
       data: null,
       // 没有已售座位的数据
@@ -83,8 +75,9 @@ export default {
       // canvasWidth: null,
       // canvas标签元素的高度
       // canvasHeight: null,
-      // 单个座位的宽度
-      seatWidth: null,
+      // 单个座位的宽度以及高度
+      seatWidth: 26,
+      seatHeight: 26,
       // 存储已选座位的code
       chooseCodes: [],
       // 遍历权重数据的索引
@@ -131,6 +124,21 @@ export default {
     this.save()
     // 渲染canvas
     this.makeCanvas()
+    // this.$refs.seats.style.width = this.canvasWidth + 'px'
+    // this.$refs.seats.style.width = this.canvasWidth + 'px'
+    this.$nextTick(() => {
+      this.scroll = new Bscroll(this.$refs.canvas, {
+        startX: 0,
+        click: true,
+        scrollX: true,
+        scrollY: true,
+        probeType: 3
+      })
+      this.scroll.on('scroll', (pos) => {
+        const y = pos.y
+        this.$refs.rowBar.style.transform = `translateY(${y}px)`
+      })
+    })
   },
   methods: {
     // 1.处理数据---排序,设置权重,创建过道,深拷贝,权重排序
@@ -296,17 +304,16 @@ export default {
       })
       return resultArr
     },
-    // 2.确定画布大小---startX绘座起始点横坐标 startY绘座起始点纵坐标
-    defineCanvas () {
+    // 2.确定画布大小---startX绘座起始点横坐标 startY绘座起始点纵坐标 w座位宽度 h座位高度
+    defineCanvas (w, h) {
       // canvas宽度===屏幕宽度->座位宽度   ---左右固定值各10
       // FIXME: 画布宽度应该由座位宽度决定, 座位宽度在375屏幕上是28*28 ---数据的最大x值乘以宽度
       // this.canvasWidth = document.body.clientWidth
       // this.canvasWidth = this.cols * 28 + 20
       // this.seatWidth = (this.canvasWidth-20)/this.cols
-      this.seatWidth = 28
       // canvas 高度 ---座位高度固定值28
-      this.canvasWidth = this.cols * 28 + 20
-      this.canvasHeight = this.rows * 28 + 20
+      this.canvasWidth = this.cols * this.seatWidth + 20
+      this.canvasHeight = this.rows * this.seatHeight + 20
       // 这里不要使用style样式来设置width和height---原始的width和height用来设置绘图尺寸,css的width和height用来设置显示尺寸
       this.$refs['seats'].width = this.canvasWidth * 4
       this.$refs['seats'].style.width = this.canvasWidth + 'px'
@@ -352,14 +359,14 @@ export default {
     },
     // canvas 加载图片---i是行数 j是列数 scale是缩放因子,默认是1
     loadImg (src, i, j) {
-      // 重新渲染图片
-      let width = this.seatWidth
+      const w = this.seatWidth
+      const h = this.seatHeight
       // 清除之前的图片
-      this.ctx.clearRect(10 + j * width, 15 + i * 28, width, 28)
+      this.ctx.clearRect(10 + j * w, 15 + i * h, w, h)
       let img = new Image()
       img.src = src
       img.onload = () => {
-        this.ctx.drawImage(img, 10 + j * width, 15 + i * 28, width, 28)
+        this.ctx.drawImage(img, 10 + j * w, 15 + i * h, w, h)
       }
     },
     setLine () {
@@ -380,7 +387,7 @@ export default {
       // pageX pageY相对浏览器内窗口,也就是当前页面   screenX screenY相对的是整个电脑屏幕窗口   ---x,y正好是索引,
       // FIXME:不应该再使用e.pageX与e.pageY,应该利用canvas本身的宽度
       let x = Math.floor((e.offsetX - 10) / this.seatWidth)
-      let y = Math.floor((e.offsetY - 10) / 28)
+      let y = Math.floor((e.offsetY - 10) / this.seatHeight)
       console.log(e.offsetX)
       if (x < 0 || x >= this.cols || y < 0 || y >= this.rows || !this.data[y][x]) {
         return
