@@ -51,6 +51,7 @@
 <script>
 import datas from '@/assets/js/data4.js'
 import Bscroll from 'better-scroll'
+import AlloyFinger from 'alloyfinger'
 export default {
   data () {
     return {
@@ -132,11 +133,38 @@ export default {
         click: true,
         scrollX: true,
         scrollY: true,
-        probeType: 3
+        // 必须设置成3,为了让行数栏跟随座位图移动
+        probeType: 3,
+        zoom: {
+          start: 1,
+          min: 1,
+          max: 2
+        }
       })
       this.scroll.on('scroll', (pos) => {
         const y = pos.y
         this.$refs.rowBar.style.transform = `translateY(${y}px)`
+      })
+      // let zoom
+      // let al = new AlloyFinger(this.$refs.canvas, {
+      //   pinch (e) {
+      //     zoom = e.zoom
+      //   }
+      // })
+      this.scroll.on('zoomStart', () => {
+        this.$refs.rowBar.style.display = 'none'
+      })
+      this.scroll.on('zoomEnd', () => {
+        // alert(zoom)
+        this.$refs.rowBar.style.display = 'block'
+        // const str1 = 'scale(2)'
+        // const str2 = 'scale(1)'
+        alert(this.$refs.canvas.style.transform)
+        // if (str1.indexOf(this.$refs.canvas.style.transform) > -1) {
+        //   alert('放大')
+        // } else if (str2.indexOf(this.$refs.canvas.style.transform) > -1) {
+        //   alert('缩小')
+        // }
       })
     })
   },
