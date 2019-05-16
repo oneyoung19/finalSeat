@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="topBox">
     <div class="wrapper">
       <div class="canvas" ref="canvas">
         <canvas class="seats" @click="choose" ref="seats"></canvas>
@@ -51,7 +51,7 @@
 <script>
 import datas from '@/assets/js/data4.js'
 import Bscroll from 'better-scroll'
-import AlloyFinger from 'alloyfinger'
+// import AlloyFinger from 'alloyfinger'
 export default {
   data () {
     return {
@@ -77,8 +77,8 @@ export default {
       // canvas标签元素的高度
       // canvasHeight: null,
       // 单个座位的宽度以及高度
-      seatWidth: 26,
-      seatHeight: 26,
+      seatWidth: 14,
+      seatHeight: 14,
       // 存储已选座位的code
       chooseCodes: [],
       // 遍历权重数据的索引
@@ -127,6 +127,14 @@ export default {
     this.makeCanvas()
     // this.$refs.seats.style.width = this.canvasWidth + 'px'
     // this.$refs.seats.style.width = this.canvasWidth + 'px'
+
+    // 缩放的最小值需要重新设置---如果座位高度*总座位行数大于外层的容器高度,min就设置为0.5,否则为1
+    // let min
+    // if (this.seatHeight * this.rows > 300) {
+    //   min = 0.5
+    // } else {
+    //   min = 1
+    // }
     this.$nextTick(() => {
       this.scroll = new Bscroll(this.$refs.canvas, {
         startX: 0,
@@ -141,9 +149,12 @@ export default {
           max: 2
         }
       })
+      let scale = 1
       this.scroll.on('scroll', (pos) => {
+        // alert(1111)
         const y = pos.y
-        this.$refs.rowBar.style.transform = `translateY(${y}px)`
+        this.$refs.rowBar.style.transform = `translateY(${y}px) scale(${scale})`
+        this.$refs.rowBar.style.transformOrigin = 'center top'
       })
       // let zoom
       // let al = new AlloyFinger(this.$refs.canvas, {
@@ -152,19 +163,22 @@ export default {
       //   }
       // })
       this.scroll.on('zoomStart', () => {
-        this.$refs.rowBar.style.display = 'none'
+        // this.$refs.rowBar.style.display = 'none'
+        // this.$refs.rowBar.style.transform = "scale(5)"
       })
       this.scroll.on('zoomEnd', () => {
-        // alert(zoom)
-        this.$refs.rowBar.style.display = 'block'
         // const str1 = 'scale(2)'
         // const str2 = 'scale(1)'
-        alert(this.$refs.canvas.style.transform)
-        // if (str1.indexOf(this.$refs.canvas.style.transform) > -1) {
-        //   alert('放大')
-        // } else if (str2.indexOf(this.$refs.canvas.style.transform) > -1) {
-        //   alert('缩小')
-        // }
+        // 获取seats的缩放因子,利用字符串
+        const str = this.$refs.seats.style.transform
+        const reg = /scale(\(\d+\.{0,1}(\d)*\))/i
+        // 获取形如scale()的字符串
+        const found = str.match(reg)[1]
+        // 将scale()中的()进行替换,得到缩放因子
+        const num = Number(found.replace(/\(|\)/g, ''))
+        // 由于zoom事件最后会触发scroll事件,所以不在zoom直接设置rowbar放大或缩小,而是让scroll事件去处理
+        scale = num
+        // this.$refs.rowBar.style.display = 'block'
       })
     })
   },
@@ -414,8 +428,8 @@ export default {
 
       // pageX pageY相对浏览器内窗口,也就是当前页面   screenX screenY相对的是整个电脑屏幕窗口   ---x,y正好是索引,
       // FIXME:不应该再使用e.pageX与e.pageY,应该利用canvas本身的宽度
-      let x = Math.floor((e.offsetX - 10) / this.seatWidth)
-      let y = Math.floor((e.offsetY - 10) / this.seatHeight)
+      let x = Math.floor((e.offsetX) / this.seatWidth)
+      let y = Math.floor((e.offsetY) / this.seatHeight)
       console.log(e.offsetX)
       if (x < 0 || x >= this.cols || y < 0 || y >= this.rows || !this.data[y][x]) {
         return
@@ -767,6 +781,9 @@ export default {
 </script>
 
 <style lang="less" scoped>
+  .topBox {
+    padding-top: 200px;
+  }
   .wrapper {
     position: relative;
     width: 100%;
@@ -779,27 +796,30 @@ export default {
     .canvas {
       display: flex;
       justify-content: center;
-      // align-items: center;
+      align-items: center;
       width: 100%;
       height: 100%;
     }
     .row {
       position: absolute;
-      top: -5px;
+      top: 50%;
       left: 0;
-      // transform: translateY(-50%);
+      // right: 0;
+      // bottom: 0;
+      // margin: auto;
+      transform: translateY(-50%);
       .rowbar {
         margin: 0;
         padding: 5px 0;
         background-color: rgba(0,0,0,0.5);
         border-radius: 10px;
         li {
-          height: 26px;
-          line-height: 28px;
+          height: 14px;
+          line-height: 14px;
           text-align: center;
           color: #fff;
           font-family: sans-serif, Geneva, Verdana;
-          font-size: 8px;
+          font-size: 6px;
         }
       }
     }
