@@ -47,7 +47,7 @@ module.exports = {
 	// webpack-dev-server 相关配置 https://webpack.js.org/configuration/dev-server/
 	devServer: {
 		// host: 'localhost',
-		host: "192.168.43.171",
+		host: "127.0.0.1",
 		port: 8000, // 端口号
 		https: false, // https:{type:Boolean}
 		open: true, //配置自动启动浏览器  http://172.16.1.12:7071/rest/mcdPhoneBar/ 

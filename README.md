@@ -1,5 +1,8 @@
 # seat
 
+## Start
+
+座位图片需要替换成自己的图片。目前项目中的旧图片链接已经无法访问。
 ## Project setup
 ```
 npm install
